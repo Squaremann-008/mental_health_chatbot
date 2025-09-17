@@ -1,0 +1,33 @@
+name: chatbot
+
+on:
+  push:
+    branches:
+      - "Oiseh's-branch"
+      - production
+      - main
+
+jobs:
+  publish-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image to GHCR
+        run: |
+          IMAGE_ID=ghcr.io/seismic-consulting-limited/mindviza-chatbot VERSION=latest
+
+          docker build -t $IMAGE_ID:$VERSION .
+          docker push $IMAGE_ID:$VERSION
